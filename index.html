@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crunch PDF - Compress PDFs Instantly</title>
+    <meta name="description" content="Free online PDF compression tool. Reduce PDF file size with three compression levels. Fast, secure, and client-side processing.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="4" width="24" height="24" rx="4" fill="url(#gradient)" />
+                    <path d="M12 16L14 18L20 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="4" y1="4" x2="28" y2="28">
+                            <stop offset="0%" stop-color="#6366f1"/>
+                            <stop offset="100%" stop-color="#8b5cf6"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1>Manfred's Nom Nom</h1>
+            </div>
+            <p class="tagline">Compress PDFs instantly in your browser</p>
+        </header>
+
+        <main class="main">
+            <!-- Drop Zone -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-content">
+                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="30" stroke="url(#iconGradient)" stroke-width="2" stroke-dasharray="4 4"/>
+                        <path d="M32 20V44M20 32L32 20L44 32" stroke="url(#iconGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="iconGradient" x1="0" y1="0" x2="64" y2="64">
+                                <stop offset="0%" stop-color="#6366f1"/>
+                                <stop offset="100%" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <h2>Drop your PDF here</h2>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept=".pdf" hidden>
+                </div>
+            </div>
+
+            <!-- File Info -->
+            <div class="file-info" id="fileInfo" style="display: none;">
+                <div class="file-details">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="file-text">
+                        <p class="file-name" id="fileName"></p>
+                        <p class="file-size" id="fileSize"></p>
+                    </div>
+                </div>
+                <button class="remove-btn" id="removeBtn" aria-label="Remove file">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Compression Levels -->
+            <div class="compression-section" id="compressionSection" style="display: none;">
+                <h3>Choose compression level</h3>
+                <div class="compression-levels">
+                    <label class="compression-card" for="low">
+                        <input type="radio" name="compression" id="low" value="low" checked>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span class="card-icon">🌿</span>
+                                <span class="card-title">Low</span>
+                            </div>
+                            <p class="card-description">Best quality, moderate compression</p>
+                            <p class="card-detail">Object streams, keep metadata</p>
+                        </div>
+                    </label>
+
+                    <label class="compression-card" for="medium">
+                        <input type="radio" name="compression" id="medium" value="medium">
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span class="card-icon">⚡</span>
+                                <span class="card-title">Medium</span>
+                            </div>
+                            <p class="card-description">Balanced quality and size</p>
+                            <p class="card-detail">Object streams, strip metadata</p>
+                        </div>
+                    </label>
+
+                    <label class="compression-card" for="high">
+                        <input type="radio" name="compression" id="high" value="high">
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span class="card-icon">🚀</span>
+                                <span class="card-title">High</span>
+                            </div>
+                            <p class="card-description">Maximum compression</p>
+                            <p class="card-detail">Rasterizes pages, JPEG ~40% quality</p>
+                        </div>
+                    </label>
+                </div>
+
+                <button class="compress-btn" id="compressBtn">
+                    <span class="btn-text">Compress PDF</span>
+                    <svg class="btn-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 10H15M15 10L10 5M15 10L10 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-content">
+                    <div class="spinner"></div>
+                    <p class="progress-text" id="progressText">Compressing your PDF...</p>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-card">
+                    <svg class="success-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="22" stroke="#10b981" stroke-width="2"/>
+                        <path d="M14 24L20 30L34 16" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3>Compression Complete!</h3>
+                    <div class="result-stats">
+                        <div class="stat">
+                            <p class="stat-label">Original Size</p>
+                            <p class="stat-value" id="originalSize"></p>
+                        </div>
+                        <div class="stat-arrow">→</div>
+                        <div class="stat">
+                            <p class="stat-label">Compressed Size</p>
+                            <p class="stat-value" id="compressedSize"></p>
+                        </div>
+                    </div>
+                    <p class="savings" id="savings"></p>
+                    <button class="new-file-btn" id="newFileBtn">Compress Another File</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>All processing happens in your browser. Your files never leave your device.</p>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
