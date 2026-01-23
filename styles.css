@@ -87,14 +87,11 @@ body {
     margin-bottom: var(--spacing-sm);
 }
 
-.logo h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    background: var(--color-accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.logo-img {
+    height: 2.5rem; /* Adjust as needed */
+    width: auto;
 }
+
 
 .tagline {
     color: var(--color-text-secondary);
