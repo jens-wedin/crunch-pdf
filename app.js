@@ -1,8 +1,8 @@
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
-import PdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = PdfjsWorker;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 // DOM Elements
 const dropZone = document.getElementById('dropZone');
