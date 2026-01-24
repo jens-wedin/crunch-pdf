@@ -1,8 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/crunch-pdf/pdf.worker.min.mjs';
 
 // DOM Elements
 const dropZone = document.getElementById('dropZone');
@@ -59,7 +57,7 @@ dropZone.addEventListener('dragleave', () => {
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         handleFile(files[0]);
@@ -79,23 +77,23 @@ async function handleFile(file) {
         alert('Please upload a PDF file');
         return;
     }
-    
+
     currentFile = file;
-    
+
     // Read file as ArrayBuffer
     const reader = new FileReader();
     reader.onload = async (e) => {
         currentFileBytes = new Uint8Array(e.target.result);
-        
+
         // Update UI
         fileName.textContent = file.name;
         fileSize.textContent = formatBytes(file.size);
-        
+
         hideElement(dropZone);
         showElement(fileInfo);
         showElement(compressionSection);
     };
-    
+
     reader.readAsArrayBuffer(file);
 }
 
@@ -107,32 +105,32 @@ removeBtn.addEventListener('click', () => {
 // Compression
 compressBtn.addEventListener('click', async () => {
     const compressionLevel = document.querySelector('input[name="compression"]:checked').value;
-    
+
     // Hide compression section, show progress
     hideElement(compressionSection);
     showElement(progressSection);
-    
+
     try {
         const compressedBytes = await compressPDF(currentFileBytes, compressionLevel);
-        
+
         // Hide progress, show result
         hideElement(progressSection);
-        
+
         // Update result stats
         const originalSizeBytes = currentFile.size;
         const compressedSizeBytes = compressedBytes.length;
         const savedBytes = originalSizeBytes - compressedSizeBytes;
         const savedPercentage = Math.round((savedBytes / originalSizeBytes) * 100);
-        
+
         originalSize.textContent = formatBytes(originalSizeBytes);
         compressedSize.textContent = formatBytes(compressedSizeBytes);
         savings.textContent = `Saved ${formatBytes(savedBytes)} (${savedPercentage}%)`;
-        
+
         showElement(resultSection);
-        
+
         // Trigger download
         downloadPDF(compressedBytes, currentFile.name);
-        
+
     } catch (error) {
         console.error('Compression error:', error);
         alert('An error occurred while compressing the PDF. Please try again.');
@@ -268,16 +266,16 @@ function downloadPDF(pdfBytes, originalFileName) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    
+
     // Generate compressed filename
     const nameWithoutExt = originalFileName.replace('.pdf', '');
     a.download = `${nameWithoutExt}_compressed.pdf`;
-    
+
     // Trigger download
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    
+
     // Clean up
     URL.revokeObjectURL(url);
 }
@@ -291,13 +289,13 @@ function resetApp() {
     currentFile = null;
     currentFileBytes = null;
     fileInput.value = '';
-    
+
     hideElement(fileInfo);
     hideElement(compressionSection);
     hideElement(progressSection);
     hideElement(resultSection);
     showElement(dropZone);
-    
+
     // Reset compression level to low
     document.getElementById('low').checked = true;
 }
