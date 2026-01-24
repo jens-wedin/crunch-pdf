@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crunch PDF - Compress PDFs Instantly</title>
-    <meta name="description" content="Free online PDF compression tool. Reduce PDF file size with three compression levels. Fast, secure, and client-side processing.">
+    <meta name="description"
+        content="Free online PDF compression tool. Reduce PDF file size with three compression levels. Fast, secure, and client-side processing.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
             <div class="logo">
-                <img src="/crunch-pdf/public/images/manfred-logo.png" alt="Manfred's Nom Nom Logo" class="logo-img">
+                <img src="/crunch-pdf/images/manfred-logo.png" alt="Manfred's Nom Nom Logo" class="logo-img">
             </div>
             <p class="tagline">Compress PDFs instantly in your browser</p>
         </header>
@@ -23,13 +26,16 @@
             <!-- Drop Zone -->
             <div class="drop-zone" id="dropZone">
                 <div class="drop-zone-content">
-                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="32" cy="32" r="30" stroke="url(#iconGradient)" stroke-width="2" stroke-dasharray="4 4"/>
-                        <path d="M32 20V44M20 32L32 20L44 32" stroke="url(#iconGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 64 64" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="30" stroke="url(#iconGradient)" stroke-width="2"
+                            stroke-dasharray="4 4" />
+                        <path d="M32 20V44M20 32L32 20L44 32" stroke="url(#iconGradient)" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
                         <defs>
                             <linearGradient id="iconGradient" x1="0" y1="0" x2="64" y2="64">
-                                <stop offset="0%" stop-color="#6366f1"/>
-                                <stop offset="100%" stop-color="#8b5cf6"/>
+                                <stop offset="0%" stop-color="#6366f1" />
+                                <stop offset="100%" stop-color="#8b5cf6" />
                             </linearGradient>
                         </defs>
                     </svg>
@@ -43,8 +49,10 @@
             <div class="file-info" id="fileInfo" style="display: none;">
                 <div class="file-details">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <div class="file-text">
                         <p class="file-name" id="fileName"></p>
@@ -53,7 +61,7 @@
                 </div>
                 <button class="remove-btn" id="removeBtn" aria-label="Remove file">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </button>
             </div>
@@ -101,8 +109,10 @@
 
                 <button class="compress-btn" id="compressBtn">
                     <span class="btn-text">Compress PDF</span>
-                    <svg class="btn-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 10H15M15 10L10 5M15 10L10 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="btn-icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 10H15M15 10L10 5M15 10L10 15" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </button>
             </div>
@@ -118,9 +128,11 @@
             <!-- Result -->
             <div class="result-section" id="resultSection" style="display: none;">
                 <div class="result-card">
-                    <svg class="success-icon" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="24" cy="24" r="22" stroke="#10b981" stroke-width="2"/>
-                        <path d="M14 24L20 30L34 16" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="success-icon" width="48" height="48" viewBox="0 0 48 48" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="22" stroke="#10b981" stroke-width="2" />
+                        <path d="M14 24L20 30L34 16" stroke="#10b981" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" />
                     </svg>
                     <h3>Compression Complete!</h3>
                     <div class="result-stats">
@@ -147,4 +159,5 @@
 
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
