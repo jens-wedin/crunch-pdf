@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       'pdf-lib': 'pdf-lib/es/index.js',
     },
+    mainFields: ['module', 'jsnext:main', 'jsnext'],
   },
   server: {
     open: '/crunch-pdf/',
