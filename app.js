@@ -143,7 +143,7 @@ compressBtn.addEventListener('click', async () => {
 async function compressPDF(pdfBytes, level) {
     const settings = getCompressionSettings(level);
 
-    if (level === 'high') {
+    if (settings.rasterize) {
         return compressPDFViaRasterize(pdfBytes, settings);
     }
 
@@ -156,7 +156,7 @@ async function compressPDF(pdfBytes, level) {
     const copiedPages = await compressedPdfDoc.copyPages(pdfDoc, [...Array(pageCount).keys()]);
     copiedPages.forEach(page => compressedPdfDoc.addPage(page));
 
-    if (level === 'medium') {
+    if (settings.stripMetadata) {
         compressedPdfDoc.setTitle('');
         compressedPdfDoc.setAuthor('');
         compressedPdfDoc.setSubject('');
@@ -244,19 +244,24 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
 }
 
 /**
- * Compression settings per level. Low/Medium: object streams + metadata stripping.
- * High: rasterize pages to JPEG (imageQuality) via pdf.js, then rebuild with pdf-lib.
+ * Compression settings per level.
+ * Level 1-2: object streams (non-rasterizing, preserves selectable text).
+ * Level 3-5: rasterize pages to JPEG via pdf.js, then rebuild with pdf-lib.
  */
 function getCompressionSettings(level) {
     switch (level) {
-        case 'low':
-            return { imageQuality: 85, objectsPerTick: 50 };
-        case 'medium':
-            return { imageQuality: 60, objectsPerTick: 100 };
-        case 'high':
-            return { imageQuality: 40, objectsPerTick: 200 };
+        case 'level1':
+            return { imageQuality: 90, objectsPerTick: 50, stripMetadata: false, rasterize: false };
+        case 'level2':
+            return { imageQuality: 80, objectsPerTick: 100, stripMetadata: true, rasterize: false };
+        case 'level3':
+            return { imageQuality: 70, objectsPerTick: 150, stripMetadata: true, rasterize: true };
+        case 'level4':
+            return { imageQuality: 50, objectsPerTick: 200, stripMetadata: true, rasterize: true };
+        case 'level5':
+            return { imageQuality: 30, objectsPerTick: 200, stripMetadata: true, rasterize: true };
         default:
-            return { imageQuality: 85, objectsPerTick: 50 };
+            return { imageQuality: 90, objectsPerTick: 50, stripMetadata: false, rasterize: false };
     }
 }
 
@@ -296,6 +301,6 @@ function resetApp() {
     hideElement(resultSection);
     showElement(dropZone);
 
-    // Reset compression level to low
-    document.getElementById('low').checked = true;
+    // Reset compression level to level 1
+    document.getElementById('level1').checked = true;
 }
