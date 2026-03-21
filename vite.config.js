@@ -11,4 +11,7 @@ export default defineConfig({
   server: {
     open: '/crunch-pdf/',
   },
+  test: {
+    exclude: ['e2e/**', 'node_modules/**'],
+  },
 });
