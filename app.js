@@ -124,7 +124,13 @@ compressBtn.addEventListener('click', async () => {
 
         originalSize.textContent = formatBytes(originalSizeBytes);
         compressedSize.textContent = formatBytes(compressedSizeBytes);
-        savings.textContent = `Saved ${formatBytes(savedBytes)} (${savedPercentage}%)`;
+        if (savedBytes > 0) {
+            savings.textContent = `Saved ${formatBytes(savedBytes)} (${savedPercentage}%)`;
+            savings.style.color = '';
+        } else {
+            savings.textContent = `File grew by ${formatBytes(Math.abs(savedBytes))} — try a higher level`;
+            savings.style.color = 'var(--color-text-muted)';
+        }
 
         showElement(resultSection);
 
@@ -217,17 +223,21 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
                 quality
             );
         });
+        canvas.width = 0;
+        canvas.height = 0;
         pages.push({ jpegBytes, width: viewport.width, height: viewport.height });
     }
 
     progressText.textContent = 'Building PDF...';
     const doc = await PDFDocument.create();
-    doc.setTitle('');
-    doc.setAuthor('');
-    doc.setSubject('');
-    doc.setKeywords([]);
-    doc.setProducer('');
-    doc.setCreator('');
+    if (settings.stripMetadata) {
+        doc.setTitle('');
+        doc.setAuthor('');
+        doc.setSubject('');
+        doc.setKeywords([]);
+        doc.setProducer('');
+        doc.setCreator('');
+    }
 
     for (const { jpegBytes, width, height } of pages) {
         const img = await doc.embedJpg(jpegBytes);
@@ -251,9 +261,9 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
 function getCompressionSettings(level) {
     switch (level) {
         case 'level1':
-            return { imageQuality: 90, objectsPerTick: 50, stripMetadata: false, rasterize: false };
+            return { objectsPerTick: 50, stripMetadata: false, rasterize: false };
         case 'level2':
-            return { imageQuality: 80, objectsPerTick: 100, stripMetadata: true, rasterize: false };
+            return { objectsPerTick: 100, stripMetadata: true, rasterize: false };
         case 'level3':
             return { imageQuality: 70, objectsPerTick: 150, stripMetadata: true, rasterize: true };
         case 'level4':
@@ -261,7 +271,7 @@ function getCompressionSettings(level) {
         case 'level5':
             return { imageQuality: 30, objectsPerTick: 200, stripMetadata: true, rasterize: true };
         default:
-            return { imageQuality: 90, objectsPerTick: 50, stripMetadata: false, rasterize: false };
+            return { objectsPerTick: 50, stripMetadata: false, rasterize: false };
     }
 }
 
