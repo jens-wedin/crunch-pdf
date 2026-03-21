@@ -184,72 +184,35 @@ async function compressPDF(pdfBytes, level) {
  * then rebuild PDF with pdf-lib. Maximizes size reduction; text becomes raster.
  */
 async function compressPDFViaRasterize(pdfBytes, settings) {
-    const quality = Math.max(0.1, Math.min(1, settings.imageQuality / 100));
-    const scale = 1;
+    const worker = new Worker(
+        new URL('./compress-worker.js', import.meta.url),
+        { type: 'module' }
+    );
 
-    progressText.textContent = 'Loading PDF...';
-    const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
-    const pdf = await loadingTask.promise;
-    const pageCount = pdf.numPages;
-
-    const pages = [];
-    for (let i = 1; i <= pageCount; i++) {
-        progressText.textContent = `Rasterizing page ${i} of ${pageCount}…`;
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        const ctx = canvas.getContext('2d');
-        await page.render({
-            canvasContext: ctx,
-            viewport,
-            intent: 'print',
-        }).promise;
-
-        const jpegBytes = await new Promise((resolve, reject) => {
-            canvas.toBlob(
-                (blob) => {
-                    if (!blob) {
-                        reject(new Error('Failed to encode page as JPEG'));
-                        return;
-                    }
-                    const r = new FileReader();
-                    r.onload = () => resolve(new Uint8Array(r.result));
-                    r.onerror = () => reject(r.error);
-                    r.readAsArrayBuffer(blob);
-                },
-                'image/jpeg',
-                quality
-            );
+    return new Promise((resolve, reject) => {
+        worker.onmessage = (e) => {
+            const { type, data } = e.data;
+            if (type === 'progress') {
+                progressText.textContent = data;
+            } else if (type === 'done') {
+                worker.terminate();
+                resolve(new Uint8Array(data));
+            } else if (type === 'error') {
+                worker.terminate();
+                reject(new Error(data));
+            }
+        };
+        worker.onerror = (e) => {
+            worker.terminate();
+            reject(new Error(e.message));
+        };
+        worker.postMessage({
+            pdfBytes,
+            imageQuality: settings.imageQuality,
+            scale: settings.scale,
+            stripMetadata: settings.stripMetadata,
+            objectsPerTick: settings.objectsPerTick,
         });
-        canvas.width = 0;
-        canvas.height = 0;
-        pages.push({ jpegBytes, width: viewport.width, height: viewport.height });
-    }
-
-    progressText.textContent = 'Building PDF...';
-    const doc = await PDFDocument.create();
-    if (settings.stripMetadata) {
-        doc.setTitle('');
-        doc.setAuthor('');
-        doc.setSubject('');
-        doc.setKeywords([]);
-        doc.setProducer('');
-        doc.setCreator('');
-    }
-
-    for (const { jpegBytes, width, height } of pages) {
-        const img = await doc.embedJpg(jpegBytes);
-        const page = doc.addPage([width, height]);
-        page.drawImage(img, { x: 0, y: 0, width, height });
-    }
-
-    progressText.textContent = 'Finalizing...';
-    return doc.save({
-        useObjectStreams: true,
-        addDefaultPage: false,
-        objectsPerTick: settings.objectsPerTick,
     });
 }
 
@@ -265,11 +228,11 @@ function getCompressionSettings(level) {
         case 'level2':
             return { objectsPerTick: 100, stripMetadata: true, rasterize: false };
         case 'level3':
-            return { imageQuality: 70, objectsPerTick: 150, stripMetadata: true, rasterize: true };
+            return { imageQuality: 70, scale: 1.0, objectsPerTick: 150, stripMetadata: true, rasterize: true };
         case 'level4':
-            return { imageQuality: 50, objectsPerTick: 200, stripMetadata: true, rasterize: true };
+            return { imageQuality: 50, scale: 0.75, objectsPerTick: 200, stripMetadata: true, rasterize: true };
         case 'level5':
-            return { imageQuality: 30, objectsPerTick: 200, stripMetadata: true, rasterize: true };
+            return { imageQuality: 30, scale: 0.5, objectsPerTick: 200, stripMetadata: true, rasterize: true };
         default:
             return { objectsPerTick: 50, stripMetadata: false, rasterize: false };
     }
