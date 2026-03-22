@@ -180,7 +180,9 @@ async function compressPDF(pdfBytes, level) {
  * Keeps pdfjs in the main thread (where document is available) and pdf-lib in the worker.
  */
 async function compressPDFViaRasterize(pdfBytes, settings) {
-    const quality = Math.max(0.1, Math.min(1, settings.imageQuality / 100));
+    const isPng = settings.imageFormat === 'png';
+    const quality = isPng ? 1 : Math.max(0.1, Math.min(1, settings.imageQuality / 100));
+    const mimeType = isPng ? 'image/png' : 'image/jpeg';
 
     // --- Rasterize in main thread ---
     progressText.textContent = 'Loading PDF...';
@@ -204,10 +206,11 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
         );
         await page.render({ canvasContext: canvas.getContext('2d'), viewport: renderViewport, intent: 'print' }).promise;
 
-        const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality });
-        const jpegBytes = new Uint8Array(await blob.arrayBuffer());
+        const blobOptions = isPng ? { type: mimeType } : { type: mimeType, quality };
+        const blob = await canvas.convertToBlob(blobOptions);
+        const imageBytes = new Uint8Array(await blob.arrayBuffer());
 
-        pages.push({ jpegBytes, width: originalViewport.width, height: originalViewport.height });
+        pages.push({ imageBytes, format: settings.imageFormat, width: originalViewport.width, height: originalViewport.height });
     }
 
     // --- Build PDF in worker (pdf-lib only, no DOM needed) ---
@@ -231,7 +234,7 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
             reject(new Error(e.message));
         };
 
-        const transfers = pages.map(p => p.jpegBytes.buffer);
+        const transfers = pages.map(p => p.imageBytes.buffer);
         worker.postMessage({ pages, stripMetadata: settings.stripMetadata, objectsPerTick: settings.objectsPerTick }, transfers);
     });
 }

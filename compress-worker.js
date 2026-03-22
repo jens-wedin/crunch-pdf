@@ -18,8 +18,8 @@ self.onmessage = async (e) => {
 
         for (let i = 0; i < pages.length; i++) {
             self.postMessage({ type: 'progress', data: `Embedding page ${i + 1} of ${pages.length}…` });
-            const { jpegBytes, width, height } = pages[i];
-            const img = await doc.embedJpg(jpegBytes);
+            const { imageBytes, format, width, height } = pages[i];
+            const img = format === 'png' ? await doc.embedPng(imageBytes) : await doc.embedJpg(imageBytes);
             const page = doc.addPage([width, height]);
             page.drawImage(img, { x: 0, y: 0, width, height });
         }
