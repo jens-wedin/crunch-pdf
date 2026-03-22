@@ -1,7 +1,10 @@
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { formatBytes, getCompressionSettings } from './lib.js';
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/crunch-pdf/pdf.worker.min.mjs';
+import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+// Configure pdfjs worker for main-thread rendering
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
 // DOM Elements
 const dropZone = document.getElementById('dropZone');
@@ -172,14 +175,43 @@ async function compressPDF(pdfBytes, level) {
 }
 
 /**
- * High compression: rasterize each page via pdf.js → canvas → JPEG (imageQuality),
- * then rebuild PDF with pdf-lib. Maximizes size reduction; text becomes raster.
+ * High compression: rasterize each page in the main thread via pdf.js → OffscreenCanvas → JPEG,
+ * then send pre-rasterized pages to the worker for PDF rebuilding with pdf-lib.
+ * Keeps pdfjs in the main thread (where document is available) and pdf-lib in the worker.
  */
 async function compressPDFViaRasterize(pdfBytes, settings) {
-    const worker = new Worker(
-        new URL('./compress-worker.js', import.meta.url),
-        { type: 'module' }
-    );
+    const quality = Math.max(0.1, Math.min(1, settings.imageQuality / 100));
+
+    // --- Rasterize in main thread ---
+    progressText.textContent = 'Loading PDF...';
+    const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
+    const pdf = await loadingTask.promise;
+    const pageCount = pdf.numPages;
+
+    const pages = [];
+    for (let i = 1; i <= pageCount; i++) {
+        progressText.textContent = `Rasterizing page ${i} of ${pageCount}…`;
+        // Yield to keep the UI responsive between pages
+        await new Promise(r => setTimeout(r, 0));
+
+        const page = await pdf.getPage(i);
+        const originalViewport = page.getViewport({ scale: 1 });
+        const renderViewport = page.getViewport({ scale: settings.scale });
+
+        const canvas = new OffscreenCanvas(
+            Math.floor(renderViewport.width),
+            Math.floor(renderViewport.height)
+        );
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: renderViewport, intent: 'print' }).promise;
+
+        const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality });
+        const jpegBytes = new Uint8Array(await blob.arrayBuffer());
+
+        pages.push({ jpegBytes, width: originalViewport.width, height: originalViewport.height });
+    }
+
+    // --- Build PDF in worker (pdf-lib only, no DOM needed) ---
+    const worker = new Worker(new URL('./compress-worker.js', import.meta.url), { type: 'module' });
 
     return new Promise((resolve, reject) => {
         worker.onmessage = (e) => {
@@ -198,13 +230,9 @@ async function compressPDFViaRasterize(pdfBytes, settings) {
             worker.terminate();
             reject(new Error(e.message));
         };
-        worker.postMessage({
-            pdfBytes,
-            imageQuality: settings.imageQuality,
-            scale: settings.scale,
-            stripMetadata: settings.stripMetadata,
-            objectsPerTick: settings.objectsPerTick,
-        });
+
+        const transfers = pages.map(p => p.jpegBytes.buffer);
+        worker.postMessage({ pages, stripMetadata: settings.stripMetadata, objectsPerTick: settings.objectsPerTick }, transfers);
     });
 }
 
