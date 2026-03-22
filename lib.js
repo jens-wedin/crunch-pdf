@@ -18,7 +18,7 @@ export function getCompressionSettings(level) {
         case 'level2':
             return { objectsPerTick: 100, stripMetadata: true, rasterize: false };
         case 'level3':
-            return { imageQuality: 95, scale: 1.0, objectsPerTick: 150, stripMetadata: true, rasterize: true };
+            return { imageQuality: 99, scale: 1.0, objectsPerTick: 150, stripMetadata: true, rasterize: true };
         case 'level4':
             return { imageQuality: 85, scale: 1.0, objectsPerTick: 200, stripMetadata: true, rasterize: true };
         case 'level5':
